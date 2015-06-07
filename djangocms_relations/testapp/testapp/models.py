@@ -9,14 +9,14 @@ from djangocms_relations import (
 
 class FKModel(models.Model):
     title = models.CharField(max_length=50)
-    fk_field = models.ForeignKey('PluginModelWithFKFromModel')
+    fk_field = models.ForeignKey('SimplePluginModel')
 
 
 class M2MTargetModel(models.Model):
     title = models.CharField(max_length=50)
 
 
-class PluginModelWithFKFromModel(CMSPlugin):
+class SimplePluginModel(CMSPlugin):
     title = models.CharField(max_length=50)
 
 
@@ -27,17 +27,31 @@ class PluginModelWithM2MToModel(CMSPlugin):
 
 class FKPluginModel(PluginWithRelationsMixin, CMSPlugin):
     title = models.CharField(max_length=50)
-    fk_field = models.ForeignKey('PluginModelWithFKFromPlugin')
+    fk_field = models.ForeignKey('SimplePluginModel')
 
 
 class M2MTargetPluginModel(CMSPlugin):
     title = models.CharField(max_length=50)
 
 
-class PluginModelWithFKFromPlugin(CMSPlugin):
-    title = models.CharField(max_length=50)
-
-
 class PluginModelWithM2MToPlugin(CMSPlugin):
     title = models.CharField(max_length=50)
-    m2m_field = M2MPluginField(M2MTargetPluginModel)
+    m2m_field = M2MPluginField(SimplePluginModel)
+
+
+class CustomThroughModel(models.Model):
+    plugin_1_draft = models.ForeignKey(SimplePluginModel)
+    plugin_1_public = models.ForeignKey(
+        SimplePluginModel,
+        related_name='custom_through_for_public'
+    )
+    plugin_2_draft = models.ForeignKey('CustomThroughPluginModel')
+    plugin_2_public = models.ForeignKey(
+        'CustomThroughPluginModel',
+        related_name='custom_through_for_public'
+    )
+
+
+class CustomThroughPluginModel(CMSPlugin):
+    title = models.CharField(max_length=50)
+    m2m_field = M2MPluginField(SimplePluginModel)

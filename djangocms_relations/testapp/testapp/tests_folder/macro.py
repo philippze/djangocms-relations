@@ -8,11 +8,10 @@ from testapp.models import (
     FKModel,
     FKPluginModel,
     M2MTargetModel,
-    PluginModelWithFKFromModel,
     PluginModelWithM2MToModel,
     M2MTargetPluginModel,
-    PluginModelWithFKFromPlugin,
-    PluginModelWithM2MToPlugin
+    PluginModelWithM2MToPlugin,
+    SimplePluginModel
 )
 
 
@@ -22,7 +21,7 @@ class TestFKFromModel(BaseRelationsTest):
     def test_copy_fk_from_plugin(self):
         plugin = api.add_plugin(
             placeholder=self.placeholder1,
-            plugin_type="PluginWithFKFromPlugin",
+            plugin_type="SimplePlugin",
             language=self.FIRST_LANG,
         )
         api.add_plugin(
@@ -60,7 +59,7 @@ class TestFKFromModel(BaseRelationsTest):
         )
         m2m_target = api.add_plugin(
             placeholder=self.placeholder2,
-            plugin_type='M2MTargetPlugin',
+            plugin_type='SimplePlugin',
             language=self.FIRST_LANG
         )
         plugin.m2m_field.add(m2m_target)

@@ -2,6 +2,8 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
+import djangocms_relations.mixins
+import djangocms_relations.fields
 
 
 class Migration(migrations.Migration):
@@ -11,6 +13,26 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.CreateModel(
+            name='CustomThroughModel',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='CustomThroughPluginModel',
+            fields=[
+                ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin')),
+                ('title', models.CharField(max_length=50)),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=('cms.cmsplugin',),
+        ),
         migrations.CreateModel(
             name='FKModel',
             fields=[
@@ -30,7 +52,7 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=('cms.cmsplugin',),
+            bases=(djangocms_relations.mixins.PluginWithRelationsMixin, 'cms.cmsplugin'),
         ),
         migrations.CreateModel(
             name='M2MTargetModel',
@@ -44,28 +66,6 @@ class Migration(migrations.Migration):
         ),
         migrations.CreateModel(
             name='M2MTargetPluginModel',
-            fields=[
-                ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin')),
-                ('title', models.CharField(max_length=50)),
-            ],
-            options={
-                'abstract': False,
-            },
-            bases=('cms.cmsplugin',),
-        ),
-        migrations.CreateModel(
-            name='PluginModelWithFKFromModel',
-            fields=[
-                ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin')),
-                ('title', models.CharField(max_length=50)),
-            ],
-            options={
-                'abstract': False,
-            },
-            bases=('cms.cmsplugin',),
-        ),
-        migrations.CreateModel(
-            name='PluginModelWithFKFromPlugin',
             fields=[
                 ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin')),
                 ('title', models.CharField(max_length=50)),
@@ -92,7 +92,17 @@ class Migration(migrations.Migration):
             fields=[
                 ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin')),
                 ('title', models.CharField(max_length=50)),
-                ('m2m_field', models.ManyToManyField(to='testapp.M2MTargetPluginModel')),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=('cms.cmsplugin',),
+        ),
+        migrations.CreateModel(
+            name='SimplePluginModel',
+            fields=[
+                ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin')),
+                ('title', models.CharField(max_length=50)),
             ],
             options={
                 'abstract': False,
@@ -100,15 +110,51 @@ class Migration(migrations.Migration):
             bases=('cms.cmsplugin',),
         ),
         migrations.AddField(
+            model_name='pluginmodelwithm2mtoplugin',
+            name='m2m_field',
+            field=djangocms_relations.fields.M2MPluginField(to='testapp.SimplePluginModel'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
             model_name='fkpluginmodel',
             name='fk_field',
-            field=models.ForeignKey(to='testapp.PluginModelWithFKFromPlugin'),
+            field=models.ForeignKey(to='testapp.SimplePluginModel'),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='fkmodel',
             name='fk_field',
-            field=models.ForeignKey(to='testapp.PluginModelWithFKFromModel'),
+            field=models.ForeignKey(to='testapp.SimplePluginModel'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='customthroughpluginmodel',
+            name='m2m_field',
+            field=djangocms_relations.fields.M2MPluginField(to='testapp.SimplePluginModel'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='customthroughmodel',
+            name='plugin_1_draft',
+            field=models.ForeignKey(to='testapp.SimplePluginModel'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='customthroughmodel',
+            name='plugin_1_public',
+            field=models.ForeignKey(related_name='custom_through_for_public', to='testapp.SimplePluginModel'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='customthroughmodel',
+            name='plugin_2_draft',
+            field=models.ForeignKey(to='testapp.CustomThroughPluginModel'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='customthroughmodel',
+            name='plugin_2_public',
+            field=models.ForeignKey(related_name='custom_through_for_public', to='testapp.CustomThroughPluginModel'),
             preserve_default=True,
         ),
     ]
