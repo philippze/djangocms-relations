@@ -1,6 +1,10 @@
 from django.db import models
 
 from cms.models import CMSPlugin
+from djangocms_relations import (
+    M2MPluginField,
+    PluginWithRelationsMixin
+)
 
 
 class FKModel(models.Model):
@@ -21,7 +25,7 @@ class PluginModelWithM2MToModel(CMSPlugin):
     m2m_field = models.ManyToManyField(M2MTargetModel)
 
 
-class FKPluginModel(CMSPlugin):
+class FKPluginModel(PluginWithRelationsMixin, CMSPlugin):
     title = models.CharField(max_length=50)
     fk_field = models.ForeignKey('PluginModelWithFKFromPlugin')
 
@@ -36,4 +40,4 @@ class PluginModelWithFKFromPlugin(CMSPlugin):
 
 class PluginModelWithM2MToPlugin(CMSPlugin):
     title = models.CharField(max_length=50)
-    m2m_field = models.ManyToManyField(M2MTargetPluginModel)
+    m2m_field = M2MPluginField(M2MTargetPluginModel)

@@ -1,3 +1,5 @@
+import unittest
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -39,6 +41,7 @@ class TestFKFromModel(CMSTestCase):
         User.objects.all().delete()
         Page.objects.all().delete()
     
+    @unittest.skip('Not yet working on this')
     def test_copy_fk_from_plugin(self):
         plugin = api.add_plugin(
             placeholder=self.placeholder1,
@@ -70,4 +73,37 @@ class TestFKFromModel(CMSTestCase):
         self.assertEqual(
             new_plugin_count,
             old_plugin_count + 1
+        )
+    
+    def test_copy_m2m_to_plugin(self):
+        plugin = api.add_plugin(
+            placeholder=self.placeholder1,
+            plugin_type="PluginWithM2MToPlugin",
+            language=self.FIRST_LANG,
+        )
+        m2m_target = api.add_plugin(
+            placeholder=self.placeholder2,
+            plugin_type='M2MTargetPlugin',
+            language=self.FIRST_LANG
+        )
+        plugin.m2m_field.add(m2m_target)
+        old_public_count = PluginModelWithM2MToPlugin.objects.filter(
+            m2m_field__placeholder__page__publisher_is_draft=False
+        ).count()
+        api.publish_page(
+            self.page1,
+            self.super_user,
+            self.FIRST_LANG
+        )
+        api.publish_page(
+            self.page2,
+            self.super_user,
+            self.FIRST_LANG
+        )
+        new_public_count = PluginModelWithM2MToPlugin.objects.filter(
+            m2m_field__placeholder__page__publisher_is_draft=False
+        ).count()
+        self.assertEqual(
+            new_public_count,
+            old_public_count + 1
         )

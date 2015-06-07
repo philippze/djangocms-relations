@@ -1,4 +1,4 @@
-export PYTHONPATH=djangocms_relations/testapp
+export PYTHONPATH=.:djangocms_relations/testapp
 export DJANGO_SETTINGS_MODULE='project.settings'
 #django-admin test testapp.TestFKFromModel
 django-admin test testapp

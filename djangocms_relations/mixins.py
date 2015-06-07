@@ -1,0 +1,4 @@
+
+
+class PluginWithRelationsMixin(object):
+    pass
