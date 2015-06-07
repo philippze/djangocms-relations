@@ -114,6 +114,6 @@ TEMPLATE_DIRS = (
 )
 
 CMS_TEMPLATES = (
-    ('templates/cms_page.html', 'CMS page'),
+    ('cms_page.html', 'CMS page'),
 )
 
