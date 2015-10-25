@@ -1,4 +1,4 @@
 
 
-class PluginWithRelationsMixin(object):
+class AutocopyRelationsMixin(object):
     pass
