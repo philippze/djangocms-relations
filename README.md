@@ -64,17 +64,11 @@ Applying the usual copying mechanism will result in two draft versions as the fo
 ![](readme-fk-cmsplugin.png "Foreign Key between two CMSPlugins")
 
 
-## A concept for dealing with many to many fields
 
-We should store two ForeignKeys for each side of the ManyToMany intermediate model.
-On for the draft and one for the public version, each.
-This is illustrated here.
+## New roadmap
 
-![](readme-m2m-concept.png "Concept for ManyToMany relation between CMSPlugins")
-
-There are a few things we need to change when starting from the usual ManyToManyField.
-
-1. Auto-generate an intermediate model with two more fields.
-2. Care about the error message that appears if there are two ForeignKeys to the same model.
-3. Change the `contribute to model` method in a way that the contributed property yields either the draft or the published related object, depending on the draft status of the object itself.
-4. Organize the publishing. When one CMSPlugin is published, the new copy must point to the published-end of the intermediate model.
+- Simply create a connection between the published and the unpublished version of the CMSPlugin.
+- Take care that it won't disturb CMSPlugins without a publishing mechanism, e.g. in model fields.
+- The connection is added to the CMSPlugin class with the mixin `AutocopyRelationsMixin`. Both, classes involved in the relationship must inherit from this mixin.
+- The mixin comes with a generic `copy_relations` method that are a useful default for ForeignKeyFields and ManyToManyFields.
+- Provide the option `autocopy_relations` to customize for which fields the default copy mechanism will be used.
