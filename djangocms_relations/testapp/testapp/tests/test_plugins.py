@@ -10,6 +10,7 @@ from testapp.models import (
     ExplicitFKCopyPlugin,
     ImplicitFKCopyPlugin,
     ModelWithRelations1,
+    ExplicitM2MCopyPlugin,
 )
 
 
@@ -66,9 +67,29 @@ class TestFKFromModel(BaseRelationsTest):
             title_set__title=self.page1.get_title(self.FIRST_LANG)
         )
         plugin_copy = ExplicitFKCopyPlugin.objects.get(placeholder__page=page_copy)
-        self.assertEqual(
-            plugin_copy.explicitfkcopyplugin.modelwithrelations1_set.values_list('title', flat=True)[0],
-            plugin.modelwithrelations1_set.values_list('title', flat=True)[0]
+        self.assertSequenceEqual(
+            list(plugin_copy.explicitfkcopyplugin.modelwithrelations1_set.values_list('title', flat=True)),
+            list(plugin.modelwithrelations1_set.values_list('title', flat=True))
+        )
+
+    def test_many_to_many_copied(self):
+        plugin = api.add_plugin(
+            placeholder=self.get_draft_placeholder_1(),
+            plugin_type="M2MPlugin",
+            language=self.FIRST_LANG,
+        )
+        model = ModelWithRelations1.objects.create(
+            title='qwerty'
+        )
+        model.m2m1.add(plugin)
+        api.publish_page(self.page1, self.super_user, self.FIRST_LANG)
+        page_copy = Page.objects.public().get(
+            title_set__title=self.page1.get_title(self.FIRST_LANG)
+        )
+        plugin_copy = ExplicitM2MCopyPlugin.objects.get(placeholder__page=page_copy)
+        self.assertSequenceEqual(
+            list(plugin_copy.explicitm2mcopyplugin.modelwithrelations1_set.values_list('title', flat=True)),
+            list(plugin.modelwithrelations1_set.values_list('title', flat=True))
         )
         
 

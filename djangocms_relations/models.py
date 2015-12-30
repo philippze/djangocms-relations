@@ -12,8 +12,7 @@ class AutocopyRelationsCMSPlugin(CMSPlugin):
         self.original_instance_id = oldinstance.pk
         self.save()
         for field in self.get_autocopy_fields():
-            objects = getattr(oldinstance, field)
-            self.copy_objects(oldinstance, objects)
+            self.copy_objects(oldinstance, field)
 
     def get_autocopy_fields(self):
         try:
@@ -22,8 +21,26 @@ class AutocopyRelationsCMSPlugin(CMSPlugin):
             return []
         # Should be extended to use some automatism
 
-    def copy_objects(self, oldinstance, objects):
+    def copy_objects(self, oldinstance, field):
+        objects = getattr(oldinstance, field)
+        if objects.__class__.__name__ == 'ManyRelatedManager':
+            self.copy_m2m(oldinstance, field)
+        else:
+            self.copy_fk(oldinstance, field)
+
+    def copy_fk(self, oldinstance, field):
+        rel = self._meta.get_field(field.replace('_set', ''))
+        objects = getattr(oldinstance, field)
         for associated_item in objects.all():
             associated_item.pk = None
-            associated_item.fk1 = self
+            setattr(
+                associated_item,
+                rel.field.name,
+                self
+            )
             associated_item.save()
+
+    def copy_m2m(self, oldinstance, field):
+        related_manager = getattr(oldinstance, field)
+        value = related_manager.all()
+        setattr(self, field, value)

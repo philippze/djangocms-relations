@@ -21,7 +21,7 @@ class ImplicitFKCopyPlugin(AutocopyRelationsCMSPlugin):
 
 
 class ExplicitM2MCopyPlugin(AutocopyRelationsCMSPlugin):
-    autocopy_fields = ['ModelWithRelations1_set']
+    autocopy_fields = ['modelwithrelations1_set']
 
 
 class ImplicitM2MCopyPlugin(AutocopyRelationsCMSPlugin):
@@ -56,11 +56,9 @@ class ModelWithRelations1(models.Model):
     )
     m2m1 = models.ManyToManyField(
         ExplicitM2MCopyPlugin,
-        null=True
     )
     m2m2 = models.ManyToManyField(
         ImplicitM2MCopyPlugin,
-        null=True
     )
 
 
@@ -75,11 +73,9 @@ class ModelWithRelations2(models.Model):
     )
     m2m1 = models.ManyToManyField(
         ExplicitM2MCopyPlugin,
-        null=True
     )
     m2m2 = models.ManyToManyField(
         ImplicitM2MCopyPlugin,
-        null=True
     )
 
 
@@ -94,11 +90,9 @@ class PluginWithRelations1(AutocopyRelationsCMSPlugin):
     )
     m2m1 = models.ManyToManyField(
         ExplicitM2MCopyPlugin,
-        null=True
     )
     m2m2 = models.ManyToManyField(
         ImplicitM2MCopyPlugin,
-        null=True
     )
 
 
@@ -113,9 +107,7 @@ class PluginWithRelations2(AutocopyRelationsCMSPlugin):
     )
     m2m1 = models.ManyToManyField(
         ExplicitM2MCopyPlugin,
-        null=True
     )
     m2m2 = models.ManyToManyField(
         ImplicitM2MCopyPlugin,
-        null=True
     )

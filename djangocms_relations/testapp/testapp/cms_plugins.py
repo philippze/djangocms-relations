@@ -10,6 +10,7 @@ from .models import (
     #PluginModelWithM2MToPlugin,
     SimplePluginModel,
     ExplicitFKCopyPlugin,
+    ExplicitM2MCopyPlugin,
 )
 
 
@@ -25,6 +26,13 @@ class FKPlugin(CMSPluginBase):
     render_template = 'cms_plugin.html'
 
 plugin_pool.register_plugin(FKPlugin)
+
+
+class M2MPlugin(CMSPluginBase):
+    model = ExplicitM2MCopyPlugin
+    render_template = 'cms_plugin.html'
+
+plugin_pool.register_plugin(M2MPlugin)
 
 """
 class PluginWithM2MToModel(CMSPluginBase):
