@@ -2,13 +2,14 @@ from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
 
 from .models import (
-    FKModel,
-    FKPluginModel,
-    M2MTargetModel,
-    PluginModelWithM2MToModel,
-    M2MTargetPluginModel,
-    PluginModelWithM2MToPlugin,
-    SimplePluginModel
+    #FKModel,
+    #FKPluginModel,
+    #M2MTargetModel,
+    #PluginModelWithM2MToModel,
+    #M2MTargetPluginModel,
+    #PluginModelWithM2MToPlugin,
+    SimplePluginModel,
+    ExplicitFKCopyPlugin,
 )
 
 
@@ -19,6 +20,13 @@ class SimplePlugin(CMSPluginBase):
 plugin_pool.register_plugin(SimplePlugin)
 
 
+class FKPlugin(CMSPluginBase):
+    model = ExplicitFKCopyPlugin
+    render_template = 'cms_plugin.html'
+
+plugin_pool.register_plugin(FKPlugin)
+
+"""
 class PluginWithM2MToModel(CMSPluginBase):
     model = PluginModelWithM2MToModel
     render_template = "cms_plugin.html"
@@ -45,3 +53,4 @@ class PluginWithM2MToPlugin(CMSPluginBase):
     render_template = "cms_plugin.html"
 
 plugin_pool.register_plugin(PluginWithM2MToPlugin)
+"""

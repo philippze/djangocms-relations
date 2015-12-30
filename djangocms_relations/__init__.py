@@ -1,2 +1,1 @@
-from .fields import M2MPluginField
-from .mixins import AutocopyRelationsMixin
+#from .mixins import AutocopyRelationsMixin

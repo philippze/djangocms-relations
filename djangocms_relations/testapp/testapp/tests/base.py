@@ -22,9 +22,28 @@ class BaseRelationsTest(CMSTestCase):
         page_data2['template'] = 'cms_page.html'
         page_data2['published'] = False
         self.page2 = api.create_page(**page_data2)
-        self.placeholder1 = self.page1.placeholders.get(slot='body')
-        self.placeholder2 = self.page2.placeholders.get(slot='body')
     
     def tearDown(self):
         User.objects.all().delete()
         Page.objects.all().delete()
+    
+    def get_draft_placeholder_1(self):
+        if not self.page1.publisher_is_draft == True:
+            return self.page1.placeholders.get(slot='body')
+        try:
+            return self.page1.publisher_draft.placeholders.get(slot='body')
+        except Page.DoesNotExist:
+            return self.page1.placeholders.get(slot='body')
+    
+    def get_draft_placeholder_2(self):
+        return self.page2.publisher_draft.placeholders.get(slog='body')
+    
+    def get_public_placeholder_1(self):
+        return self.page1.publisher_public.placeholders.get(slog='body')
+    
+    def get_public_placeholder_2(self):
+        return self.page2.publisher_public.placeholders.get(slog='body')
+
+    def get_draft_plugin_1(self):
+        placeholder = self.get_draft_placeholder_1()
+        return placeholder.cmsplugin_set.get()

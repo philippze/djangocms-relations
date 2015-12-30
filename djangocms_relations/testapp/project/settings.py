@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     'menus',
     'sekizai',
     'djangocms_admin_style',
+    'djangocms_relations',
     
     'testapp',
 )
