@@ -36,7 +36,12 @@ class BaseRelationsTest(CMSTestCase):
             return self.page1.placeholders.get(slot='body')
     
     def get_draft_placeholder_2(self):
-        return self.page2.publisher_draft.placeholders.get(slog='body')
+        if not self.page2.publisher_is_draft == True:
+            return self.page2.placeholders.get(slot='body')
+        try:
+            return self.page2.publisher_draft.placeholders.get(slot='body')
+        except Page.DoesNotExist:
+            return self.page2.placeholders.get(slot='body')
     
     def get_public_placeholder_1(self):
         return self.page1.publisher_public.placeholders.get(slog='body')

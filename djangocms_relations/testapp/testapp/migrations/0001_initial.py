@@ -116,7 +116,8 @@ class Migration(migrations.Migration):
             name='PluginWithRelations1',
             fields=[
                 ('autocopyrelationscmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='djangocms_relations.AutocopyRelationsCMSPlugin')),
-                ('fk1', models.ForeignKey(to='testapp.ExplicitFKCopyPlugin', null=True)),
+                ('title', models.CharField(max_length=50)),
+                ('fk1', models.ForeignKey(to='testapp.ExplicitPluginFKCopyPlugin', null=True)),
                 ('fk2', models.ForeignKey(to='testapp.ImplicitFKCopyPlugin', null=True)),
                 ('m2m1', models.ManyToManyField(to='testapp.ExplicitM2MCopyPlugin')),
                 ('m2m2', models.ManyToManyField(to='testapp.ImplicitM2MCopyPlugin')),
@@ -130,7 +131,7 @@ class Migration(migrations.Migration):
             name='PluginWithRelations2',
             fields=[
                 ('autocopyrelationscmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='djangocms_relations.AutocopyRelationsCMSPlugin')),
-                ('fk1', models.ForeignKey(to='testapp.ExplicitFKCopyPlugin', null=True)),
+                ('fk1', models.ForeignKey(to='testapp.ExplicitPluginFKCopyPlugin', null=True)),
                 ('fk2', models.ForeignKey(to='testapp.ImplicitFKCopyPlugin', null=True)),
                 ('m2m1', models.ManyToManyField(to='testapp.ExplicitM2MCopyPlugin')),
                 ('m2m2', models.ManyToManyField(to='testapp.ImplicitM2MCopyPlugin')),

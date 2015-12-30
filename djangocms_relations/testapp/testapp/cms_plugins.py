@@ -11,6 +11,8 @@ from .models import (
     SimplePluginModel,
     ExplicitFKCopyPlugin,
     ExplicitM2MCopyPlugin,
+    ExplicitPluginFKCopyPlugin,
+    PluginWithRelations1,
 )
 
 
@@ -33,6 +35,21 @@ class M2MPlugin(CMSPluginBase):
     render_template = 'cms_plugin.html'
 
 plugin_pool.register_plugin(M2MPlugin)
+
+
+class PluginFKPlugin(CMSPluginBase):
+    model = ExplicitPluginFKCopyPlugin
+    render_template = 'cms_plugin.html'
+
+plugin_pool.register_plugin(PluginFKPlugin)
+
+
+class PluginWithRelations(CMSPluginBase):
+    model = PluginWithRelations1
+    render_template = 'cms_plugin.html'
+
+plugin_pool.register_plugin(PluginWithRelations)
+
 
 """
 class PluginWithM2MToModel(CMSPluginBase):

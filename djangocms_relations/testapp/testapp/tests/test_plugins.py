@@ -11,6 +11,7 @@ from testapp.models import (
     ImplicitFKCopyPlugin,
     ModelWithRelations1,
     ExplicitM2MCopyPlugin,
+    ExplicitPluginFKCopyPlugin,
 )
 
 
@@ -91,69 +92,41 @@ class TestFKFromModel(BaseRelationsTest):
             list(plugin_copy.explicitm2mcopyplugin.modelwithrelations1_set.values_list('title', flat=True)),
             list(plugin.modelwithrelations1_set.values_list('title', flat=True))
         )
-        
 
-    @unittest.skip('Not yet working on this')
-    def test_publish_plugin_fk_points_to(self):
-        models_with_fk_to_page_old_count = FKModel.objects.filter(
-            fk_field__placeholder__page=self.page1,
-            fk_field__placeholder__page__publisher_is_draft=True
-        ).count()
-        plugin = api.add_plugin(
-            placeholder=self.get_draft_placeholder_1(),
-            plugin_type="SimplePlugin",
-            language=self.FIRST_LANG,
-        )
-        model = FKModel.objects.create(
-            title='Some title',
-            fk_field=plugin
-        )
-        api.publish_page(self.page1, self.super_user, self.FIRST_LANG)
-        models_with_fk_to_page_count = FKModel.objects.filter(
-            fk_field__placeholder__page=self.page1,
-            fk_field__placeholder__page__publisher_is_draft=True
-        ).count()
-        self.assertEqual(
-            models_with_fk_to_page_count,
-            models_with_fk_to_page_old_count + 1
-        )
-            
-        
-    
-    @unittest.skip('Not yet working on this')
     def test_copy_fk_from_plugin(self):
         plugin = api.add_plugin(
-            placeholder=self.placeholder1,
-            plugin_type="SimplePlugin",
+            placeholder=self.get_draft_placeholder_1(),
+            plugin_type="PluginFKPlugin",
             language=self.FIRST_LANG,
         )
-        api.add_plugin(
-            placeholder=self.placeholder2,
-            plugin_type='FKPlugin',
+        plugin_with_fk = api.add_plugin(
+            placeholder=self.get_draft_placeholder_2(),
+            plugin_type='PluginWithRelations',
             language=self.FIRST_LANG,
-            fk_field=plugin
-        )
-        old_plugin_count = FKPluginModel.objects.filter(
-            fk_field__placeholder__page__publisher_is_draft=False
-        ).count()
-        api.publish_page(
-            self.page1,
-            self.super_user,
-            self.FIRST_LANG
+            title='zxcv',
+            fk1=plugin
         )
         api.publish_page(
             self.page2,
             self.super_user,
             self.FIRST_LANG
         )
-        new_plugin_count = FKPluginModel.objects.filter(
-            fk_field__placeholder__page__publisher_is_draft=False
-        ).count()
-        self.assertEqual(
-            new_plugin_count,
-            old_plugin_count + 1
+        api.publish_page(
+            self.page1,
+            self.super_user,
+            self.FIRST_LANG
         )
-    
+        # TODO: Also write test where page1 is published first.
+        page_copy = Page.objects.public().get(
+            title_set__title=self.page1.get_title(self.FIRST_LANG)
+        )
+        plugin_copy = ExplicitPluginFKCopyPlugin.objects.get(placeholder__page=page_copy)
+        self.assertEqual(
+            list(plugin_copy.pluginwithrelations1_set.values_list('title', flat=True)),
+            list(plugin.pluginwithrelations1_set.values_list('title', flat=True))
+        )
+
+
     @unittest.skip('Not yet working on this')
     def test_copy_m2m_to_plugin(self):
         plugin = api.add_plugin(

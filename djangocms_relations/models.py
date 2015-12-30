@@ -6,7 +6,11 @@ from cms.models import CMSPlugin
 
 
 class AutocopyRelationsCMSPlugin(CMSPlugin):
-    original_instance = models.ForeignKey('self', null=True)
+    original_instance = models.OneToOneField(
+        'self',
+        null=True,
+        related_name='copied_instance'
+    )
 
     def copy_relations(self, oldinstance):
         self.original_instance_id = oldinstance.pk
@@ -32,6 +36,10 @@ class AutocopyRelationsCMSPlugin(CMSPlugin):
         rel = self._meta.get_field(field.replace('_set', ''))
         objects = getattr(oldinstance, field)
         for associated_item in objects.all():
+            try:
+                associated_item = associated_item.original_instance or associated_item
+            except AttributeError:
+                pass
             associated_item.pk = None
             setattr(
                 associated_item,

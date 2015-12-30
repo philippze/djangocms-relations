@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name='AutocopyRelationsCMSPlugin',
             fields=[
                 ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin')),
-                ('original_instance', models.ForeignKey(to='djangocms_relations.AutocopyRelationsCMSPlugin', null=True)),
+                ('original_instance', models.OneToOneField(related_name='copied_instance', null=True, to='djangocms_relations.AutocopyRelationsCMSPlugin')),
             ],
             options={
                 'abstract': False,
