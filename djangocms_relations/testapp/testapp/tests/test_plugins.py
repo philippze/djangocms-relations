@@ -18,26 +18,16 @@ from testapp.models import (
 class TestFKFromModel(BaseRelationsTest):
 
     def test_plugin_has_old_instance_property(self):
-        placeholder = self.get_draft_placeholder_1()
-        plugin = api.add_plugin(
-            placeholder=placeholder,
-            plugin_type="SimplePlugin",
-            language=self.FIRST_LANG,
-        )
+        plugin = self.add_plugin('SimplePlugin', self.page1)
         try:
             plugin.original_instance
         except AttributeError:
             self.fail('Plugin has no property `old_instance`.')
 
     def test_old_instance_reachable_after_copy(self):
-        placeholder = self.get_draft_placeholder_1()
-        old_plugin = api.add_plugin(
-            placeholder=placeholder,
-            plugin_type="SimplePlugin",
-            language=self.FIRST_LANG,
-        )
+        old_plugin = self.add_plugin('SimplePlugin', self.page1)
         new_base_plugin = old_plugin.simplepluginmodel.copy_plugin(
-            placeholder,
+            self.placeholder(self.page1),
             self.FIRST_LANG,
             {}
         )
@@ -53,17 +43,15 @@ class TestFKFromModel(BaseRelationsTest):
             ['modelwithrelations1_set']
         )
 
+    ##
+
     def test_reverse_foreign_key_copied(self):
-        plugin = api.add_plugin(
-            placeholder=self.get_draft_placeholder_1(),
-            plugin_type="FKPlugin",
-            language=self.FIRST_LANG,
-        )
+        plugin = self.add_plugin('FKPlugin', self.page1)
         model = ModelWithRelations1.objects.create(
             fk1=plugin,
             title='asdf'
         )
-        api.publish_page(self.page1, self.super_user, self.FIRST_LANG)
+        self.publish_page(self.page1)
         page_copy = Page.objects.public().get(
             title_set__title=self.page1.get_title(self.FIRST_LANG)
         )
@@ -74,52 +62,26 @@ class TestFKFromModel(BaseRelationsTest):
         )
 
     def test_many_to_many_copied(self):
-        plugin = api.add_plugin(
-            placeholder=self.get_draft_placeholder_1(),
-            plugin_type="M2MPlugin",
-            language=self.FIRST_LANG,
-        )
+        plugin = self.add_plugin('M2MPlugin', self.page1)
         model = ModelWithRelations1.objects.create(
             title='qwerty'
         )
         model.m2m1.add(plugin)
-        api.publish_page(self.page1, self.super_user, self.FIRST_LANG)
-        page_copy = Page.objects.public().get(
-            title_set__title=self.page1.get_title(self.FIRST_LANG)
-        )
+        page_copy = self.publish_page(self.page1)
         plugin_copy = ExplicitM2MCopyPlugin.objects.get(placeholder__page=page_copy)
         self.assertSequenceEqual(
             list(plugin_copy.explicitm2mcopyplugin.modelwithrelations1_set.values_list('title', flat=True)),
             list(plugin.modelwithrelations1_set.values_list('title', flat=True))
         )
 
+    ##
+
     def test_copy_fk_from_plugin(self):
-        plugin = api.add_plugin(
-            placeholder=self.get_draft_placeholder_1(),
-            plugin_type="PluginFKPlugin",
-            language=self.FIRST_LANG,
-        )
-        plugin_with_fk = api.add_plugin(
-            placeholder=self.get_draft_placeholder_2(),
-            plugin_type='PluginWithRelations',
-            language=self.FIRST_LANG,
-            title='zxcv',
-            fk1=plugin
-        )
-        api.publish_page(
-            self.page2,
-            self.super_user,
-            self.FIRST_LANG
-        )
-        api.publish_page(
-            self.page1,
-            self.super_user,
-            self.FIRST_LANG
-        )
+        plugin = self.add_plugin('PluginFKPlugin', self.page1)
+        plugin_with_fk = self.add_plugin('PluginWithRelations', self.page2)
+        self.publish_page(self.page2)
+        page_copy = self.publish_page(self.page1)
         # TODO: Also write test where page1 is published first.
-        page_copy = Page.objects.public().get(
-            title_set__title=self.page1.get_title(self.FIRST_LANG)
-        )
         plugin_copy = ExplicitPluginFKCopyPlugin.objects.get(placeholder__page=page_copy)
         self.assertEqual(
             list(plugin_copy.pluginwithrelations1_set.values_list('title', flat=True)),

@@ -26,28 +26,21 @@ class BaseRelationsTest(CMSTestCase):
     def tearDown(self):
         User.objects.all().delete()
         Page.objects.all().delete()
-    
-    def get_draft_placeholder_1(self):
-        if not self.page1.publisher_is_draft == True:
-            return self.page1.placeholders.get(slot='body')
-        try:
-            return self.page1.publisher_draft.placeholders.get(slot='body')
-        except Page.DoesNotExist:
-            return self.page1.placeholders.get(slot='body')
-    
-    def get_draft_placeholder_2(self):
-        if not self.page2.publisher_is_draft == True:
-            return self.page2.placeholders.get(slot='body')
-        try:
-            return self.page2.publisher_draft.placeholders.get(slot='body')
-        except Page.DoesNotExist:
-            return self.page2.placeholders.get(slot='body')
-    
-    def get_public_placeholder_1(self):
-        return self.page1.publisher_public.placeholders.get(slog='body')
-    
-    def get_public_placeholder_2(self):
-        return self.page2.publisher_public.placeholders.get(slog='body')
+
+    def publish_page(self, page):
+        api.publish_page(page, self.super_user, self.FIRST_LANG)
+        return Page.objects.get(publisher_public_id=page.pk)
+
+    def placeholder(self, page):
+        return page.placeholders.get(slot='body')
+
+    def add_plugin(self, plugin_type, page, **kwargs):
+        return api.add_plugin(
+            self.placeholder(page),
+            plugin_type,
+            language=self.FIRST_LANG,
+            **kwargs
+        )
 
     def get_draft_plugin_1(self):
         placeholder = self.get_draft_placeholder_1()
