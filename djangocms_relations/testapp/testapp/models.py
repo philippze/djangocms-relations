@@ -29,6 +29,7 @@ class ImplicitM2MCopyPlugin(AutocopyRelationsCMSPlugin):
 
 
 class ExplicitPluginFKCopyPlugin(AutocopyRelationsCMSPlugin):
+    title = models.CharField(max_length=50)
     autocopy_fields = ['pluginwithrelations1_set']
 
 
@@ -96,6 +97,8 @@ class PluginWithRelations1(AutocopyRelationsCMSPlugin):
         ImplicitM2MCopyPlugin,
     )
 
+    autocopy_fields = ['fk1', 'fk2', 'm2m1', 'm2m2']
+
 
 class PluginWithRelations2(AutocopyRelationsCMSPlugin):
     fk1 = models.ForeignKey(
@@ -112,3 +115,19 @@ class PluginWithRelations2(AutocopyRelationsCMSPlugin):
     m2m2 = models.ManyToManyField(
         ImplicitM2MCopyPlugin,
     )
+
+
+
+## For utils tests
+
+
+class A(models.Model):
+    pass
+
+
+class B(A):
+    pass
+
+
+class C(B):
+    pass

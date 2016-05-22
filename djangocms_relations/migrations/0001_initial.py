@@ -12,10 +12,10 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='AutocopyRelationsCMSPlugin',
+            name='RelationsCMSPlugin',
             fields=[
                 ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin')),
-                ('original_instance', models.OneToOneField(related_name='copied_instance', null=True, to='djangocms_relations.AutocopyRelationsCMSPlugin')),
+                ('autocopy_draft', models.OneToOneField(related_name='autocopy_public', null=True, to='djangocms_relations.RelationsCMSPlugin')),
             ],
             options={
                 'abstract': False,

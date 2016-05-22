@@ -12,6 +12,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
+            name='A',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+            ],
+        ),
+        migrations.CreateModel(
             name='ExplicitFKCopyPlugin',
             fields=[
                 ('autocopyrelationscmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='djangocms_relations.AutocopyRelationsCMSPlugin')),
@@ -35,6 +41,7 @@ class Migration(migrations.Migration):
             name='ExplicitPluginFKCopyPlugin',
             fields=[
                 ('autocopyrelationscmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='djangocms_relations.AutocopyRelationsCMSPlugin')),
+                ('title', models.CharField(max_length=50)),
             ],
             options={
                 'abstract': False,
@@ -151,5 +158,19 @@ class Migration(migrations.Migration):
                 'abstract': False,
             },
             bases=('djangocms_relations.autocopyrelationscmsplugin',),
+        ),
+        migrations.CreateModel(
+            name='B',
+            fields=[
+                ('a_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='testapp.A')),
+            ],
+            bases=('testapp.a',),
+        ),
+        migrations.CreateModel(
+            name='C',
+            fields=[
+                ('b_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='testapp.B')),
+            ],
+            bases=('testapp.b',),
         ),
     ]

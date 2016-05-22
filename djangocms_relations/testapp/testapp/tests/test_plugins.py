@@ -1,5 +1,7 @@
 import unittest
 
+from django.core.exceptions import ObjectDoesNotExist
+
 from cms import api
 from cms.models import Page
 
@@ -12,19 +14,20 @@ from testapp.models import (
     ModelWithRelations1,
     ExplicitM2MCopyPlugin,
     ExplicitPluginFKCopyPlugin,
+    PluginWithRelations1,
 )
 
 
 class TestFKFromModel(BaseRelationsTest):
 
-    def test_plugin_has_old_instance_property(self):
+    def test_plugin_has_autocopy_draft_property(self):
         plugin = self.add_plugin('SimplePlugin', self.page1)
         try:
-            plugin.original_instance
+            plugin.autocopy_draft
         except AttributeError:
-            self.fail('Plugin has no property `old_instance`.')
+            self.fail('Plugin has no property `draft`.')
 
-    def test_old_instance_reachable_after_copy(self):
+    def skip_test_old_instance_reachable_after_copy(self):
         old_plugin = self.add_plugin('SimplePlugin', self.page1)
         new_base_plugin = old_plugin.simplepluginmodel.copy_plugin(
             self.placeholder(self.page1),
@@ -34,7 +37,7 @@ class TestFKFromModel(BaseRelationsTest):
         new_plugin = SimplePluginModel.objects.get(pk=new_base_plugin.pk)
         self.assertEqual(
             old_plugin.pk,
-            new_plugin.original_instance.pk
+            new_plugin.draft.pk
         )
 
     def test_explicit_autocopy_fields_found(self):
@@ -74,51 +77,88 @@ class TestFKFromModel(BaseRelationsTest):
             list(plugin.modelwithrelations1_set.values_list('title', flat=True))
         )
 
-    ##
 
-    def test_copy_fk_from_plugin(self):
-        plugin = self.add_plugin('PluginFKPlugin', self.page1)
-        plugin_with_fk = self.add_plugin('PluginWithRelations', self.page2)
-        self.publish_page(self.page2)
-        page_copy = self.publish_page(self.page1)
-        # TODO: Also write test where page1 is published first.
-        plugin_copy = ExplicitPluginFKCopyPlugin.objects.get(placeholder__page=page_copy)
+
+class FKBetweenPluginsTestCase(BaseRelationsTest):
+
+    @property
+    def target_page(self):
+        return self.page1
+
+    @property
+    def origin_page(self):
+        return self.page2
+
+    def get_target_plugin(self, page):
+        return ExplicitPluginFKCopyPlugin.objects.get(placeholder__page=page)
+
+    def get_origin_plugin(self, page):
+        return PluginWithRelations1.objects.get(placeholder__page=page)
+
+    def setUp(self):
+        super(FKBetweenPluginsTestCase, self).setUp()
+        self.fk_target = self.add_plugin('PluginFKPlugin', self.target_page)
+        self.fk_target = ExplicitPluginFKCopyPlugin.objects.get(pk=self.fk_target.pk)
+        self.fk_origin = self.add_plugin('PluginWithRelations', self.origin_page, title='zxcvb', fk1=self.fk_target)
+        # Fetch new from database to see reverse foreign key:
+        self.fk_target = ExplicitPluginFKCopyPlugin.objects.get(pk=self.fk_target.pk)
+
+    def test_public_origin_has_correct_class(self):
+        draft_origin = PluginWithRelations1.objects.get()
+        self.publish_page(self.origin_page)
         self.assertEqual(
-            list(plugin_copy.pluginwithrelations1_set.values_list('title', flat=True)),
-            list(plugin.pluginwithrelations1_set.values_list('title', flat=True))
+            draft_origin.public.__class__.__name__,
+            'PluginWithRelations1'
         )
 
-
-    @unittest.skip('Not yet working on this')
-    def test_copy_m2m_to_plugin(self):
-        plugin = api.add_plugin(
-            placeholder=self.placeholder1,
-            plugin_type="PluginWithM2MToPlugin",
-            language=self.FIRST_LANG,
-        )
-        m2m_target = api.add_plugin(
-            placeholder=self.placeholder2,
-            plugin_type='SimplePlugin',
-            language=self.FIRST_LANG
-        )
-        plugin.m2m_field.add(m2m_target)
-        old_public_count = PluginModelWithM2MToPlugin.objects.filter(
-            m2m_field__placeholder__page__publisher_is_draft=False
-        ).count()
-        api.publish_page(
-            self.page1,
-            self.super_user,
-            self.FIRST_LANG
-        )
-        api.publish_page(
-            self.page2,
-            self.super_user,
-            self.FIRST_LANG
-        )
-        new_public_count = PluginModelWithM2MToPlugin.objects.filter(
-            m2m_field__placeholder__page__publisher_is_draft=False
-        ).count()
+    def ttest_relation_survives_origin_publishing(self):
+        target_before = self.fk_origin.fk1
+        self.publish_page(self.origin_page)
+        target_after = self.fk_origin.fk1
         self.assertEqual(
-            new_public_count,
-            old_public_count + 1
+            target_after,
+            target_before
+        )
+
+    def ttest_relation_survives_target_publishing(self):
+        target_before = self.fk_origin.fk1
+        self.publish_page(self.target_page)
+        target_after = self.fk_origin.fk1
+        self.assertEqual(
+            target_after,
+            target_before
+        )
+
+    def ttest_published_origin_has_no_relation_with_draft(self):
+        public_origin_page = self.publish_page(self.origin_page)
+        public_origin_plugin = self.get_origin_plugin(public_origin_page)
+        with self.assertRaises(ObjectDoesNotExist):
+            public_origin_plugin.fk1
+
+    def ttest_published_target_has_no_relation_with_draft(self):
+        public_target_page = self.publish_page(self.target_page)
+        public_target_plugin = self.get_target_plugin(public_target_page)
+        with self.assertRaises(ObjectDoesNotExist):
+            public_target_plugin.pluginwithrelations1
+
+    def test_relation_between_published_when_origin_published_first(self):
+        public_origin_page = self.publish_page(self.origin_page)
+        public_target_page = self.publish_page(self.target_page)
+        public_origin_plugin = self.get_origin_plugin(public_origin_page)
+        public_target_plugin = self.get_target_plugin(public_target_page)
+        self.assertEqual(
+            public_target_plugin.pluginwithrelations1_set.get(),
+            public_origin_plugin
+        )
+
+    def test_relation_between_published_when_target_published_first(self):
+        public_target_page = self.publish_page(self.target_page)
+        public_origin_page = self.publish_page(self.origin_page)
+        public_origin_plugin = self.get_origin_plugin(public_origin_page)
+        public_target_plugin = self.get_target_plugin(public_target_page)
+        print self.get_target_plugin(self.target_page).pluginwithrelations1_set.all()
+        print public_target_plugin.pluginwithrelations1_set.all()
+        self.assertEqual(
+            public_target_plugin.pluginwithrelations1_set.get(),
+            public_origin_plugin
         )

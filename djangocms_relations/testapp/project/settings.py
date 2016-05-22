@@ -135,25 +135,26 @@ INSTALLED_APPS = (
     'menus',
     'sekizai',
     'treebeard',
-    'djangocms_text_ckeditor',
-    'djangocms_style',
-    'djangocms_column',
-    'filer',
-    'easy_thumbnails',
-    'cmsplugin_filer_image',
-    'cmsplugin_filer_file',
-    'cmsplugin_filer_folder',
-    'cmsplugin_filer_teaser',
-    'cmsplugin_filer_utils',
-    'cmsplugin_filer_video',
-    'djangocms_googlemap',
-    'djangocms_inherit',
-    'djangocms_link',
+    #'djangocms_text_ckeditor',
+    #'djangocms_style',
+    #'djangocms_column',
+    #'filer',
+    #'easy_thumbnails',
+    #'cmsplugin_filer_image',
+    #'cmsplugin_filer_file',
+    #'cmsplugin_filer_folder',
+    #'cmsplugin_filer_teaser',
+    #'cmsplugin_filer_utils',
+    #'cmsplugin_filer_video',
+    #'djangocms_googlemap',
+    #'djangocms_inherit',
+    #'djangocms_link',
     'reversion',
     'project',
 
     'djangocms_relations',
-    'testapp',
+    'icecream',
+    #'testapp',
 )
 
 LANGUAGES = (
@@ -191,7 +192,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'HOST': 'localhost',
-        'NAME': ':memory:',
+        'NAME': 'database.db',
+        'TEST': {
+            'NAME': ':memory:',
+        }
     }
 }
 
