@@ -1,3 +1,3 @@
 export PYTHONPATH=.:djangocms_relations/testapp
-export DJANGO_SETTINGS_MODULE='project.settings'
+export DJANGO_SETTINGS_MODULE='testapp.settings'
 django-admin test icecream
