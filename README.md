@@ -1,74 +1,56 @@
 # djangocms-relations
 
-Handling relations for custom cmsplugins
+
+## Handling relations for custom CMSPlugins
+
+This plugin should do two things (and do them well):
+
+1. Provide a mechanism to deal with relations **between** CMSPlugins.
+2. Simplify dealing with relations in custom CMSPlugins in general.
 
 
-## Installation
+## Usage
 
-`$ git clone git@github.com:philippze/djangocms-relations.git <yourfolder>`
+- Let all your CMSPlugins involved in relations inherit from `djangocms_relations.models.RelationsCMSPlugin`.
+- Tell the plugin about the relations it has using the property `autocopy_fields`, like this:
 
-`$ pip install -r test_requirements/django-1.7.txt`
+`autocopy_fields = {  
+    'fk': [],  
+    'm2m': ['sauces'],  
+    'plugin_fk': ['pictures'],  
+    'plugin_m2m': ['flavors']  
+}
+`
+
+- Then, writing your own `copy_relations` methods is no more necessary. Everything will be copied automatically.
+- When you have relations between plugins and publish an involved page, their relations are renewed such that afterwards the published plugins have only relations with published plugins and draft plugins, too, have only relations between each other.
 
 
-## Running tests (Currently: Error)
+## Requirements
 
-`cd <yourfolder>` 
+- Django 1.8
+- DjangoCMS 3.2
+- Python 2.7
+
+
+## Running tests
+
+To execute the tests, after installing the `test_requirements/django-1.8.txt`
+you can use the simple `TEST` shell script:
 
 `./TEST`
 
 
-## Roadmap
+## Still to do
 
-1. Create a working ManyToManyField to another CMSPlugin
-2. Create little helpers as an alternative to defining `copy_relations` for every relation field.
-3. Think about a solution for ForeignKeys
-4. Ideas about optimizing relations between CMSPlugins and usual models might appear.
+### Mandatory
 
+- Check what happens when CMSPlugins with relations are deleted
+- Check that test on "Publish an involved page" cover all scenarios.
 
-## The problem with relations
+### Enhancements
 
-In the Django CMS,
-as soon as a page is published every CMSPlugin exists in two versions.
-A public and a draft version.
-There is no direct link between them.
-
-When we publish changes on a page,
-the CMSPlugins of the public version will be deleted
-and replaced by copys of the draft version's plugins.
-
-
-## Standard-Solution: ForeignKey from model to CMSPlugin
-
-If there is a foreign key from a model to a CMSPlugin,
-we have to create a copy of the model instance
-when publishing the CMSPluigin.
-
-The new copy of the original instance will be related
-to the public version of the CMSPlugin
-while the model instance we edit should have a relation
-with the draft version of the CMSPlugin.
-
-This graphic shows what happens.
-
-![](readme-fk.png "Foreign Key between model and CMSPlugin")
-
-
-
-## The problem with relations between two CMSPlugins
-
-Creating a copy of the model instance where the ForeignKey comes from
-conflicts with the concept of one draft and one publich version of a CMSPlugin.
-
-Applying the usual copying mechanism will result in two draft versions as the following graphics shows.
-
-![](readme-fk-cmsplugin.png "Foreign Key between two CMSPlugins")
-
-
-
-## New roadmap
-
-- Simply create a connection between the published and the unpublished version of the CMSPlugin.
-- Take care that it won't disturb CMSPlugins without a publishing mechanism, e.g. in model fields.
-- The connection is added to the CMSPlugin class with the mixin `AutocopyRelationsMixin`. Both, classes involved in the relationship must inherit from this mixin.
-- The mixin comes with a generic `copy_relations` method that are a useful default for ForeignKeyFields and ManyToManyFields.
-- Provide the option `autocopy_relations` to customize for which fields the default copy mechanism will be used.
+- Provide a `PluginField` and a `ManyPluginsField` for relations between plugins. They should have only draft versions in their querysets.
+- Build an automatism for detecting the relations a CMSPlugin has and skip the `autocopy_fields` property.
+- Add some model validation.
+- Support Python 3.
